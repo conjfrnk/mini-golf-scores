@@ -326,6 +326,52 @@ class _ScoreKeeperState extends State<ScoreKeeper> {
     );
   }
 
+  void _showPlayerRankings(BuildContext context) {
+    // Calculate total scores for each player
+    Map<String, int> totalScores = {};
+    for (var name in playerNames) {
+      int totalScore = 0;
+      scores.forEach((hole, playerScores) {
+        int playerIndex = playerNames.indexOf(name);
+        if (playerScores.length > playerIndex) {
+          totalScore += playerScores[playerIndex];
+        }
+      });
+      totalScores[name] = totalScore;
+    }
+
+    // Remove players with a total score of 0
+    totalScores.removeWhere((name, score) => score == 0);
+
+    // Sort players by total score
+    var sortedScores = totalScores.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+
+    // Create a list of player names and scores for display, sorted by score
+    List<Widget> scoreWidgets = sortedScores.map((entry) {
+      return Text('${entry.key}: ${entry.value}');
+    }).toList();
+
+    // Show the rankings in a dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Player Rankings'),
+          content: SingleChildScrollView(
+            child: ListBody(children: scoreWidgets),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -395,13 +441,18 @@ class _ScoreKeeperState extends State<ScoreKeeper> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // Total Par Display
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  'Total Par: ${pars.values.fold(0, (prev, par) => prev + par)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              GestureDetector(
+                onTap: () => _showPlayerRankings(context),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.blueGrey[100],
+                  child: Text(
+                    'Total Par: ${pars.values.fold(0, (prev, par) => prev + par)}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
+
               // Divider between Total Par and Players' Scores
               const VerticalDivider(color: Colors.black),
               // Players' Scores
