@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_golf/scorekeeper.dart';
+import 'package:mini_golf_scores/scorekeeper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -120,8 +120,14 @@ class MainMenu extends StatelessWidget {
                             children: <Widget>[
                               const Text('Mini Golf Scorekeeper App'),
                               const Text('Made by Connor Frank'),
-                              const Text('Princeton NJ April 2024'),
+                              const Text('Princeton NJ'),
+                              const Text(''),
                               Text('Version: $version'), // Display app version
+                              const Text(''),
+                              const Text('Mini Golf Scores  Copyright (C) 2024 Connor Frank'),
+                              const Text('This program comes with ABSOLUTELY NO WARRANTY.'),
+                              const Text('This is free software, and you are welcome to redistribute it under certain conditions.'),
+                              const Text('View \'Licenses\' in main menu for details.'),
                               // Add more about info here
                             ],
                           ),
@@ -142,9 +148,16 @@ class MainMenu extends StatelessWidget {
               ),
               // License Button
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+                  String version = packageInfo.version;
                   // Action for License button
-                  showLicensePage(context: context);
+                  showLicensePage(
+                    context: context,
+                    applicationName: 'Mini Golf Scores',
+                    applicationVersion: version,
+                    applicationLegalese: '© 2024 Connor Frank'
+                  );
                 },
                 child: const Text('License'),
               ),
@@ -164,6 +177,20 @@ class MainMenu extends StatelessWidget {
                 },
                 child: const Text(
                     'GitHub'), // You can use an Icon instead: Icon(Icons.link)
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Uri link = Uri(scheme: 'mailto',
+                      path: 'conjfrnk+minigolf@gmail.com');
+                  if (await canLaunchUrl(link)) {
+                    await launchUrl(link);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open GitHub')),
+                    );
+                  }
+                },
+                child: const Text('Contact'),
               ),
             ],
           ),

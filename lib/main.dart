@@ -1,7 +1,13 @@
+C
 import 'package:flutter/material.dart';
-import 'package:mini_golf/main_menu.dart';
+import 'package:flutter/services.dart';
+import 'package:mini_golf_scores/main_menu.dart';
 
 void main() {
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('LICENSE');
+    yield LicenseEntryWithLineBreaks(['mini_golf_scores'], license);
+  });
   runApp(const MiniGolfScoreApp());
 }
 
