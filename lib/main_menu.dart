@@ -9,21 +9,21 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
   void _showLoadGameDialog(BuildContext context) async {
+    final localContext = context;
     final prefs = await SharedPreferences.getInstance();
     final gameKeys = prefs.getKeys()
         .where((key) => key.startsWith('game_'))
         .toList();
 
     if (gameKeys.isEmpty) {
-      // No games found, show a SnackBar instead
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(localContext).showSnackBar(
         const SnackBar(content: Text('No saved games found.')),
       );
       return;
     }
 
     showDialog(
-      context: context,
+      context: localContext,
       builder: (context) {
         return AlertDialog(
           title: const Text('Select a Game to Load'),
@@ -34,7 +34,7 @@ class MainMenu extends StatelessWidget {
                   title: Text(key.substring(5).substring(0, 16).replaceAll(
                       "T", " ")),
                   onTap: () {
-                    _loadGame(context, key);
+                    _loadGame(localContext, key);
                   },
                 );
               }).toList(),
@@ -46,16 +46,16 @@ class MainMenu extends StatelessWidget {
   }
 
   Future<void> _loadGame(BuildContext context, String gameKey) async {
+    final localContext = context;
     final prefs = await SharedPreferences.getInstance();
     final gameDataJson = prefs.getString(gameKey);
     if (gameDataJson != null) {
       final gameData = jsonDecode(gameDataJson);
-      // Assuming gameData structure. Convert data types as necessary.
-      Navigator.of(context).pop(); // Close the selection dialog
+      Navigator.of(localContext).pop(); // Close the selection dialog
       Navigator.push(
-        context,
+        localContext,
         MaterialPageRoute(
-          builder: (context) =>
+          builder: (localContext) =>
               ScoreKeeper(
                 isNewGame: false,
                 playerNames: List<String>.from(gameData['playerNames']),
@@ -70,8 +70,65 @@ class MainMenu extends StatelessWidget {
     }
   }
 
+  void showAboutDialog(BuildContext context) async {
+    final localContext = context;
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String version = packageInfo.version;
+
+    showDialog(
+      context: localContext,
+      builder: (BuildContext localContext) {
+        return AlertDialog(
+          title: const Text('About'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Mini Golf Scorekeeper App'),
+                const Text('Made by Connor Frank'),
+                const Text('Princeton NJ'),
+                const Text(''),
+                Text('Version: $version'), // Display app version
+                const Text(''),
+                const Text('Mini Golf Scores  Copyright (C) 2024 Connor Frank'),
+                const Text('This program comes with ABSOLUTELY NO WARRANTY.'),
+                const Text('This is free software, and you are welcome to redistribute it under certain conditions.'),
+                const Text('View \'Licenses\' in main menu for details.'),
+                // Add more about info here
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Contact Me'),
+              onPressed: () async {
+                Uri link = Uri(scheme: 'mailto',
+                    path: 'conjfrnk+minigolf@gmail.com',
+                    query: 'subject=Mini Golf Scores App',
+                );
+                if (await canLaunchUrl(link)) {
+                  await launchUrl(link);
+                } else {
+                  ScaffoldMessenger.of(localContext).showSnackBar(
+                    const SnackBar(content: Text('Could not launch email client')),
+                  );
+                }
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localContext = context;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mini Golf Main Menu'),
@@ -85,9 +142,9 @@ class MainMenu extends StatelessWidget {
             child: const Text('Start New Game'),
             onPressed: () {
               Navigator.push(
-                context,
+                localContext,
                 MaterialPageRoute(
-                    builder: (context) => const ScoreKeeper(isNewGame: true)),
+                    builder: (localContext) => const ScoreKeeper(isNewGame: true)),
               );
             },
           ),
@@ -95,7 +152,7 @@ class MainMenu extends StatelessWidget {
           // Space between the buttons
           ElevatedButton(
             child: const Text('Load Game'),
-            onPressed: () => _showLoadGameDialog(context),
+            onPressed: () => _showLoadGameDialog(localContext),
           ),
           const Spacer(),
           // This will push the bottom content to the bottom of the screen
@@ -106,43 +163,8 @@ class MainMenu extends StatelessWidget {
             children: [
               // About Button
               ElevatedButton(
-                onPressed: () async {
-                  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-                  String version = packageInfo.version;
-
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('About'),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: <Widget>[
-                              const Text('Mini Golf Scorekeeper App'),
-                              const Text('Made by Connor Frank'),
-                              const Text('Princeton NJ'),
-                              const Text(''),
-                              Text('Version: $version'), // Display app version
-                              const Text(''),
-                              const Text('Mini Golf Scores  Copyright (C) 2024 Connor Frank'),
-                              const Text('This program comes with ABSOLUTELY NO WARRANTY.'),
-                              const Text('This is free software, and you are welcome to redistribute it under certain conditions.'),
-                              const Text('View \'Licenses\' in main menu for details.'),
-                              // Add more about info here
-                            ],
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('OK'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                onPressed: () {
+                  showAboutDialog(localContext);
                 },
                 child: const Text('About'),
               ),
@@ -153,7 +175,7 @@ class MainMenu extends StatelessWidget {
                   String version = packageInfo.version;
                   // Action for License button
                   showLicensePage(
-                    context: context,
+                    context: localContext,
                     applicationName: 'Mini Golf Scores',
                     applicationVersion: version,
                     applicationLegalese: '© 2024 Connor Frank'
@@ -170,27 +192,13 @@ class MainMenu extends StatelessWidget {
                   if (await canLaunchUrl(link)) {
                     await launchUrl(link);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    ScaffoldMessenger.of(localContext).showSnackBar(
                       const SnackBar(content: Text('Could not open GitHub')),
                     );
                   }
                 },
                 child: const Text(
                     'GitHub'), // You can use an Icon instead: Icon(Icons.link)
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Uri link = Uri(scheme: 'mailto',
-                      path: 'conjfrnk+minigolf@gmail.com');
-                  if (await canLaunchUrl(link)) {
-                    await launchUrl(link);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Could not open GitHub')),
-                    );
-                  }
-                },
-                child: const Text('Contact'),
               ),
             ],
           ),

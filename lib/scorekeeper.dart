@@ -94,6 +94,12 @@ class ScoreKeeperState extends State<ScoreKeeper> {
     );
   }
 
+  Future<void> _saveGameIfUnsaved() async {
+    if (!widget.isNewGame) {
+      await _saveGame();
+    }
+  }
+
   Future<void> _saveGame() async {
     final prefs = await SharedPreferences.getInstance();
     final String timestamp = gameCreationTime.toIso8601String();
@@ -319,8 +325,8 @@ class ScoreKeeperState extends State<ScoreKeeper> {
     }
 
     return ListTile(
-      title: Text('Hole $holeNumber'),
-      subtitle: Text(scoreText),
+      title: Text('Hole $holeNumber', style: Theme.of(context).textTheme.bodyMedium),
+      subtitle: Text(scoreText, style: Theme.of(context).textTheme.bodySmall),
       onTap: () => _showHoleDetailsDialog(holeNumber),
     );
   }
@@ -375,6 +381,13 @@ class ScoreKeeperState extends State<ScoreKeeper> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _saveGameIfUnsaved(); // Call your save game method
+            Navigator.of(context).pop(); // Navigate back after saving
+          },
+        ),
         title: const Text('Mini Golf Score Keeper'),
         actions: [
           IconButton(
@@ -432,7 +445,7 @@ class ScoreKeeperState extends State<ScoreKeeper> {
         ),
       ),
       bottomNavigationBar: Container(
-        color: Colors.blueGrey[100],
+        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[850] : Colors.blueGrey[100],
         height: 60.0,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -444,10 +457,12 @@ class ScoreKeeperState extends State<ScoreKeeper> {
                 onTap: () => _showPlayerRankings(context),
                 child: Container(
                   padding: const EdgeInsets.all(10),
-                  color: Colors.blueGrey[100],
                   child: Text(
                     'Total Par: ${pars.values.fold(0, (prev, par) => prev + par)}',
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, // White or black text based on theme
+                    ),
                   ),
                 ),
               ),
@@ -468,8 +483,8 @@ class ScoreKeeperState extends State<ScoreKeeper> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(name),
-                      Text('Score: $totalScore'),
+                      Text(name, style: Theme.of(context).textTheme.bodySmall),
+                      Text('Score: $totalScore', style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 );
