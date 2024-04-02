@@ -19,10 +19,10 @@ class ScoreKeeper extends StatefulWidget {
   });
 
   @override
-  _ScoreKeeperState createState() => _ScoreKeeperState();
+  ScoreKeeperState createState() => ScoreKeeperState();
 }
 
-class _ScoreKeeperState extends State<ScoreKeeper> {
+class ScoreKeeperState extends State<ScoreKeeper> {
   late List<String> playerNames;
   late Map<int, int> pars;
   late Map<int, List<int>> scores;
@@ -256,7 +256,6 @@ class _ScoreKeeperState extends State<ScoreKeeper> {
 
   void _deleteLastHole() {
     if (scores.isEmpty) return; // No holes to delete
-    print(_numberOfHoles);
 
     final lastHoleScores = scores[_numberOfHoles - 1];
     final isAllZeros =
