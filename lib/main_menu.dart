@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mini_golf/scorekeeper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
 
 class MainMenu extends StatelessWidget {
@@ -8,7 +10,9 @@ class MainMenu extends StatelessWidget {
 
   void _showLoadGameDialog(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    final gameKeys = prefs.getKeys().where((key) => key.startsWith('game_')).toList();
+    final gameKeys = prefs.getKeys()
+        .where((key) => key.startsWith('game_'))
+        .toList();
 
     if (gameKeys.isEmpty) {
       // No games found, show a SnackBar instead
@@ -27,7 +31,8 @@ class MainMenu extends StatelessWidget {
             child: ListBody(
               children: gameKeys.map((key) {
                 return ListTile(
-                  title: Text(key.substring(5).substring(0,16).replaceAll("T", " ")),
+                  title: Text(key.substring(5).substring(0, 16).replaceAll(
+                      "T", " ")),
                   onTap: () {
                     _loadGame(context, key);
                   },
@@ -50,18 +55,20 @@ class MainMenu extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ScoreKeeper(
-            isNewGame: false,
-            playerNames: List<String>.from(gameData['playerNames']),
-            pars: Map.from(gameData['pars']).map((k, v) => MapEntry(int.parse(k), v)),
-            scores: Map.from(gameData['scores']).map((k, v) => MapEntry(int.parse(k), List<int>.from(v))),
-            gameCreationTime: DateTime.parse(gameData['creationTime']),
-          ),
+          builder: (context) =>
+              ScoreKeeper(
+                isNewGame: false,
+                playerNames: List<String>.from(gameData['playerNames']),
+                pars: Map.from(gameData['pars']).map((k, v) =>
+                    MapEntry(int.parse(k), v)),
+                scores: Map.from(gameData['scores']).map((k, v) =>
+                    MapEntry(int.parse(k), List<int>.from(v))),
+                gameCreationTime: DateTime.parse(gameData['creationTime']),
+              ),
         ),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,26 +76,100 @@ class MainMenu extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Mini Golf Main Menu'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              child: const Text('Start New Game'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ScoreKeeper(isNewGame: true)),
-                );
-              },
-            ),
-            const SizedBox(height: 16), // Space between the buttons
-            ElevatedButton(
-              child: const Text('Load Game'),
-              onPressed: () => _showLoadGameDialog(context),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          const Spacer(),
+          // Pushes everything below it towards the middle and bottom of the screen
+          // Main action buttons centered in the middle of the screen
+          ElevatedButton(
+            child: const Text('Start New Game'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ScoreKeeper(isNewGame: true)),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          // Space between the buttons
+          ElevatedButton(
+            child: const Text('Load Game'),
+            onPressed: () => _showLoadGameDialog(context),
+          ),
+          const Spacer(),
+          // This will push the bottom content to the bottom of the screen
+          // Information buttons at the bottom
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // Space out the buttons evenly in the Row
+            children: [
+              // About Button
+              ElevatedButton(
+                onPressed: () async {
+                  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+                  String version = packageInfo.version;
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('About'),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              const Text('Mini Golf Scorekeeper App'),
+                              const Text('Made by Connor Frank'),
+                              const Text('Princeton NJ April 2024'),
+                              Text('Version: $version'), // Display app version
+                              // Add more about info here
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('About'),
+              ),
+              // License Button
+              ElevatedButton(
+                onPressed: () {
+                  // Action for License button
+                  showLicensePage(context: context);
+                },
+                child: const Text('License'),
+              ),
+              // GitHub Link Button
+              ElevatedButton(
+                onPressed: () async {
+                  Uri link = Uri(scheme: 'https',
+                    host: 'github.com',
+                    path: '/conjfrnk/mini-golf-scores');
+                  if (await canLaunchUrl(link)) {
+                    await launchUrl(link);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open GitHub')),
+                    );
+                  }
+                },
+                child: const Text(
+                    'GitHub'), // You can use an Icon instead: Icon(Icons.link)
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Ensures there's space at the very bottom
+        ],
       ),
     );
   }
