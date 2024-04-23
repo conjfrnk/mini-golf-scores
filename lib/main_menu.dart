@@ -85,7 +85,7 @@ class MainMenu extends StatelessWidget {
               children: <Widget>[
                 const Text('Mini Golf Scorekeeper App'),
                 const Text('Made by Connor Frank'),
-                const Text('Princeton NJ'),
+                const Text('Princeton NJ ca. April 2024'),
                 const Text(''),
                 Text('Version: $version'), // Display app version
                 const Text(''),
@@ -131,7 +131,7 @@ class MainMenu extends StatelessWidget {
     final localContext = context;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mini Golf Main Menu'),
+        title: const Text('Mini Golf Scores'),
       ),
       body: Column(
         children: [

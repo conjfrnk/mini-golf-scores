@@ -224,7 +224,7 @@ class ScoreKeeperState extends State<ScoreKeeper> {
           title: const Text('Edit Player Names'),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(hintText: 'Player 1, Player 2'),
+            decoration: const InputDecoration(hintText: 'Player 1, Player 2, ...'),
           ),
           actions: <Widget>[
             TextButton(
@@ -316,7 +316,7 @@ class ScoreKeeperState extends State<ScoreKeeper> {
         final playerName = playerNames[i];
         final playerScore = scores[holeNumber]!.length > i
             ? scores[holeNumber]![i].toString()
-            : 'N/A';
+            : '0';
         scoreDetails.add('$playerName: $playerScore');
       }
       scoreText += '  ${scoreDetails.join('  ')}';
@@ -412,7 +412,7 @@ class ScoreKeeperState extends State<ScoreKeeper> {
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
+          padding: const EdgeInsets.only(bottom: 4.0),
           // Adjust padding as needed
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -456,7 +456,7 @@ class ScoreKeeperState extends State<ScoreKeeper> {
               GestureDetector(
                 onTap: () => _showPlayerRankings(context),
                 child: Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(20),
                   child: Text(
                     'Total Par: ${pars.values.fold(0, (prev, par) => prev + par)}',
                     style: TextStyle(
